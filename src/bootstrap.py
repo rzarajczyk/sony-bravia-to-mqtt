@@ -13,7 +13,7 @@ def start_service():
     logger = logging.getLogger("main")
     logger.info("Starting application!")
 
-    config_file = os.getenv('CONFIG', 'config/sony-bravia-to-mqtt.yaml')
+    config_file = os.getenv('CONFIG', 'config/config.yaml')
 
     with open(config_file, 'r') as f:
         config = yaml.full_load(f)

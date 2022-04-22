@@ -1,4 +1,4 @@
-# sont-bravia-to-mqtt
+# sony-bravia-to-mqtt
 
 Sony Bravia Android TV integration via MQTT in [Homie Convection](https://homieiot.github.io/)
 
