@@ -15,3 +15,4 @@ handlers:
 formatters:
   standard:
     format: "%(levelname)-8s | %(asctime)s | %(threadName)-25s | %(name)s: %(message)s"
+    datefmt: '%Y-%m-%d %H:%M:%S %z'
