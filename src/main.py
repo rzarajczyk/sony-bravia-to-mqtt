@@ -7,7 +7,6 @@ from SonyBravia import SonyBravia
 from bootstrap.bootstrap import start_service
 
 config, logger, timezone = start_service()
-logging.getLogger().setLevel(logging.DEBUG)
 
 scheduler = BlockingScheduler(timezone=timezone)
 

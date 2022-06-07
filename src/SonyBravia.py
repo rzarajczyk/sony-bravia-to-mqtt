@@ -66,10 +66,15 @@ class SonyBravia:
                 StringProperty("cast", retained=False, set_handler=self.play_url)
             ])
         ])
+        self.chromecast_connect()
 
     def chromecast_connect(self):
+        self.logger.info('Finding chromecast devices...')
         chromecasts, browser = pychromecast.discovery.discover_chromecasts(known_hosts=[self.chromecast_ip])
-        pychromecast.discovery.stop_discovery(browser)
+        browser.stop_discovery()
+        if len(chromecasts) < 1:
+            raise Exception('Found %s chromecast devices' % (len(chromecasts)))
+
         uuids = []
         for chromecast in chromecasts:
             if chromecast.host == self.chromecast_ip:
@@ -82,6 +87,7 @@ class SonyBravia:
         self.chromecast = chromecasts[0]
         self.chromecast.wait()
         self.media_controller = self.chromecast.media_controller
+        self.logger.info('Chromecast device found')
 
     def refresh(self):
         ok = True
@@ -100,8 +106,6 @@ class SonyBravia:
             self.logger.warning("Sony Bravia unreachable: %s" % str(e))
             ok = False
         try:
-            if self.chromecast is None:
-                self.chromecast_connect()
             self.property_player_app.value = self.chromecast.app_display_name
             self.property_player_state.value = self.media_controller.status.player_state
             self.property_player_url.value = self.media_controller.status.content_id
@@ -109,6 +113,7 @@ class SonyBravia:
         except Exception as e:
             self.logger.warning("Sony Bravia - Chromecast unreachable: %s" % str(e))
             ok = False
+            self.chromecast_connect()
         self.homie.state = State.READY if ok else State.ALERT
 
     def set_volume(self, volume):
@@ -202,5 +207,11 @@ class SonyBravia:
             info = response.info()
             content_type = info.get_content_type()
         self.logger.info("Content type is %s" % content_type)
-        self.media_controller.play_media(url, content_type)
-        self.media_controller.block_until_active()
+        try:
+            self.media_controller.play_media(url, content_type)
+            self.media_controller.block_until_active()
+        except pychromecast.error.NotConnected as e:
+            self.logger.warning('Chromecast error. Reconnecting...')
+            self.chromecast_connect()
+            self.media_controller.play_media(url, content_type)
+            self.media_controller.block_until_active()
