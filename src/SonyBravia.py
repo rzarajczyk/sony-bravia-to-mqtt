@@ -26,7 +26,7 @@ class SonyBravia:
         self.media_controller: MediaController = None
 
         self.property_volume = IntProperty("volume-level",
-                                           min_value=0,
+                                           min_value=-1,
                                            max_value=80,
                                            set_handler=self.set_volume)
         self.property_ison = BooleanProperty("ison", name="Turned on", set_handler=self.set_ison)
