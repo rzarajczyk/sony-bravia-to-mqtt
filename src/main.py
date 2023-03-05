@@ -1,10 +1,8 @@
-import logging
-
 from apscheduler.schedulers.blocking import BlockingScheduler
+from bootstrap.bootstrap import start_service
 from homie_helpers import MqttSettings
 
 from SonyBravia import SonyBravia
-from bootstrap.bootstrap import start_service
 
 config, logger, timezone = start_service()
 

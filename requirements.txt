@@ -1,6 +1,6 @@
 pyyaml~=6.0
-APScheduler==3.9.1
-homie-helpers~=0.0.6
-pychromecast~=12.0.0
+APScheduler==3.10.1
+homie-helpers~=0.0.7
+pychromecast==13.0.4
 bravia-tv~=1.0.11
-service-bootstrap~=0.0.2
+service-bootstrap~=0.0.5

@@ -20,10 +20,10 @@ class SonyBravia:
         self.device = BraviaRC(config['ip'], mac=config['mac'])
         self.pin: str = config['pin']
         self.id: str = config['unique-id']
-        self.chromecast_ip = config['ip']
-        self.chromecast_browser: CastBrowser = None
-        self.chromecast: pychromecast.Chromecast = None
-        self.media_controller: MediaController = None
+        # self.chromecast_ip = config['ip']
+        # self.chromecast_browser: CastBrowser = None
+        # self.chromecast: pychromecast.Chromecast = None
+        # self.media_controller: MediaController = None
 
         self.property_volume = IntProperty("volume-level",
                                            min_value=-1,
@@ -31,10 +31,10 @@ class SonyBravia:
                                            set_handler=self.set_volume)
         self.property_ison = BooleanProperty("ison", name="Turned on", set_handler=self.set_ison)
 
-        self.property_player_app = StringProperty("player-app")
-        self.property_player_state = StringProperty("player-state")
-        self.property_player_url = StringProperty("player-content-url")
-        self.property_player_type = StringProperty("player-content-type")
+        # self.property_player_app = StringProperty("player-app")
+        # self.property_player_state = StringProperty("player-state")
+        # self.property_player_url = StringProperty("player-content-url")
+        # self.property_player_type = StringProperty("player-content-type")
 
         self.homie = Homie(mqtt_settings, device_id, "Sony Bravia Android TV", nodes=[
             Node("volume", properties=[self.property_volume]),
@@ -58,36 +58,36 @@ class SonyBravia:
                 BooleanProperty("home", retained=False, set_handler=self.home),
                 BooleanProperty("input", retained=False, set_handler=self.input)
             ]),
-            Node("player", properties=[
-                self.property_player_app,
-                self.property_player_url,
-                self.property_player_state,
-                self.property_player_type,
-                StringProperty("cast", retained=False, set_handler=self.play_url)
-            ])
+            # Node("player", properties=[
+            #     self.property_player_app,
+            #     self.property_player_url,
+            #     self.property_player_state,
+            #     self.property_player_type,
+            #     StringProperty("cast", retained=False, set_handler=self.play_url)
+            # ])
         ])
-        self.chromecast_connect()
+        # self.chromecast_connect()
 
-    def chromecast_connect(self):
-        self.logger.info('Finding chromecast devices...')
-        chromecasts, browser = pychromecast.discovery.discover_chromecasts(known_hosts=[self.chromecast_ip])
-        browser.stop_discovery()
-        if len(chromecasts) < 1:
-            raise Exception('Found %s chromecast devices' % (len(chromecasts)))
-
-        uuids = []
-        for chromecast in chromecasts:
-            if chromecast.host == self.chromecast_ip:
-                uuids.append(chromecast.uuid)
-
-        chromecasts, browser = pychromecast.get_listed_chromecasts(uuids=uuids, known_hosts=[self.chromecast_ip])
-        self.chromecast_browser = browser
-        if len(chromecasts) != 1:
-            raise Exception('Found %s chromecast devices with UUIDs %s' % (len(chromecasts), str(uuids)))
-        self.chromecast = chromecasts[0]
-        self.chromecast.wait()
-        self.media_controller = self.chromecast.media_controller
-        self.logger.info('Chromecast device found')
+    # def chromecast_connect(self):
+    #     self.logger.info('Finding chromecast devices...')
+    #     chromecasts, browser = pychromecast.discovery.discover_chromecasts(known_hosts=[self.chromecast_ip])
+    #     browser.stop_discovery()
+    #     if len(chromecasts) < 1:
+    #         raise Exception('Found %s chromecast devices' % (len(chromecasts)))
+    #
+    #     uuids = []
+    #     for chromecast in chromecasts:
+    #         if chromecast.host == self.chromecast_ip:
+    #             uuids.append(chromecast.uuid)
+    #
+    #     chromecasts, browser = pychromecast.get_listed_chromecasts(uuids=uuids, known_hosts=[self.chromecast_ip])
+    #     self.chromecast_browser = browser
+    #     if len(chromecasts) != 1:
+    #         raise Exception('Found %s chromecast devices with UUIDs %s' % (len(chromecasts), str(uuids)))
+    #     self.chromecast = chromecasts[0]
+    #     self.chromecast.wait()
+    #     self.media_controller = self.chromecast.media_controller
+    #     self.logger.info('Chromecast device found')
 
     def refresh(self):
         ok = True
@@ -105,15 +105,15 @@ class SonyBravia:
         except Exception as e:
             self.logger.warning("Sony Bravia unreachable: %s" % str(e))
             ok = False
-        try:
-            self.property_player_app.value = self.chromecast.app_display_name
-            self.property_player_state.value = self.media_controller.status.player_state
-            self.property_player_url.value = self.media_controller.status.content_id
-            self.property_player_type.value = self.media_controller.status.content_type
-        except Exception as e:
-            self.logger.warning("Sony Bravia - Chromecast unreachable: %s" % str(e))
-            ok = False
-            self.chromecast_connect()
+        # try:
+        #     self.property_player_app.value = self.chromecast.app_display_name
+        #     self.property_player_state.value = self.media_controller.status.player_state
+        #     self.property_player_url.value = self.media_controller.status.content_id
+        #     self.property_player_type.value = self.media_controller.status.content_type
+        # except Exception as e:
+        #     self.logger.warning("Sony Bravia - Chromecast unreachable: %s" % str(e))
+        #     ok = False
+        #     self.chromecast_connect()
         self.homie.state = State.READY if ok else State.ALERT
 
     def set_volume(self, volume):
@@ -200,18 +200,18 @@ class SonyBravia:
         if value:
             self.logger.info("Select input")
             self.device.send_req_ircc('AAAAAQAAAAEAAAAlAw==')
-
-    def play_url(self, url):
-        self.logger.info("Playing URL %s" % url)
-        with urllib.request.urlopen(url) as response:
-            info = response.info()
-            content_type = info.get_content_type()
-        self.logger.info("Content type is %s" % content_type)
-        try:
-            self.media_controller.play_media(url, content_type)
-            self.media_controller.block_until_active()
-        except pychromecast.error.NotConnected as e:
-            self.logger.warning('Chromecast error. Reconnecting...')
-            self.chromecast_connect()
-            self.media_controller.play_media(url, content_type)
-            self.media_controller.block_until_active()
+    #
+    # def play_url(self, url):
+    #     self.logger.info("Playing URL %s" % url)
+    #     with urllib.request.urlopen(url) as response:
+    #         info = response.info()
+    #         content_type = info.get_content_type()
+    #     self.logger.info("Content type is %s" % content_type)
+    #     try:
+    #         self.media_controller.play_media(url, content_type)
+    #         self.media_controller.block_until_active()
+    #     except pychromecast.error.NotConnected as e:
+    #         self.logger.warning('Chromecast error. Reconnecting...')
+    #         self.chromecast_connect()
+    #         self.media_controller.play_media(url, content_type)
+    #         self.media_controller.block_until_active()
